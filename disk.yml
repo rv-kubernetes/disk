@@ -1,0 +1,106 @@
+# volume
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: local-vol1
+spec:
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /test-ebs
+      name: test-volume
+      
+  volumes:
+  - name: test-volume
+    hostPath: 
+      path: /data
+      type: Directory # default/optional 
+      
+--- # aws volume example
+   volumes:
+   - name: test-volume
+   awsElasticBlockStore:
+     volumeID: <volume-id>
+     fsType: ext4
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/data
+# path will be created on the node
+# not sure behaviour if reschedule on the other node
+
+---    
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: mypod
+spec:
+ containers:
+   - name: myfrontend
+     image: nginx
+     volumeMounts:
+     - mountPath: "/var/www/html"
+       name: mypd
+ volumes:
+   - name: mypd
+     persistentVolumeClaim:
+       claimName: pvc1
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+# pvc aws example
+kind: PersistentVolumeClaim
+metadata:
+  name: azure-managed-disk
+spec:  
+   awsElasticBlockStore:
+     volumeID: xxxxx
+     fsType: ext4
+     
+---
+apiVersion: v1
+kind: StorageClass
+metadata:
+  name: gcp-storage
+provisioner: kubernetes.io/gce-pd
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-gcp
+spec:
+  storageClassName: gcp-storage # above sc
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
