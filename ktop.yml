@@ -1,0 +1,14 @@
+Deploying Heapster is very straight forward.
+
+kubectl apply --filename https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/rbac/heapster-rbac.yaml
+kubectl apply --filename https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/standalone/heapster-controller.yaml
+
+
+For me, the problem is I didn't install the metric server and installing metric server is worked for me:
+
+$ git clone https://github.com/kodekloudhub/kubernetes-metrics-server.git
+$ kubectl create -f kubernetes-metrics-server/
+
+reference from : https://stackoverflow.com/questions/52860209/kubernetes-1-11-could-not-find-heapster-for-metrics
+
+hope it can helps.
