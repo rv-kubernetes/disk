@@ -108,3 +108,8 @@ spec:
 #dynamic provisioning example
 provisioner: kubernetes.io/gce-pd
 
+#no provisioner example
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+
