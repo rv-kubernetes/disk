@@ -104,3 +104,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
+#dynamic provisioning example
+provisioner: kubernetes.io/gce-pd
+
