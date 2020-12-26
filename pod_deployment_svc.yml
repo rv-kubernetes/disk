@@ -513,3 +513,43 @@ controlplane $
 controlplane $ k get pods -n kube-system -o wide | grep -i kube-apiserver
 kube-apiserver-controlplane              1/1     Running   0          12m   172.17.0.21   controlplane   <none>           <none>
 controlplane $
+
+
+
+
+# this is another run, new ip of host is 172.17.0.21 
+controlplane $ kubectl get svc
+NAME                               TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+kubernetes                         ClusterIP      10.96.0.1       <none>        443/TCP        21m
+webapp1-clusterip-svc              ClusterIP      10.102.33.74    <none>        80/TCP         19m
+webapp1-clusterip-targetport-svc   ClusterIP      10.104.9.203    <none>        8080/TCP       18m
+webapp1-externalip-svc             ClusterIP      10.98.165.45    172.17.0.21   80/TCP         116s
+webapp1-loadbalancer-svc           LoadBalancer   10.105.126.19   172.17.0.21   80:30959/TCP   84s
+webapp1-nodeport-svc               NodePort       10.111.162.85   <none>        80:30080/TCP   18m
+controlplane $ curl 10.105.126.19
+<h1>This request was processed by host: webapp1-loadbalancer-deployment-f45b8d9cd-hqtwm</h1>
+controlplane $ curl 172.17.0.21
+<h1>This request was processed by host: webapp1-loadbalancer-deployment-f45b8d9cd-hqtwm</h1>
+controlplane $ curl 172.17.0.21:30080
+<h1>This request was processed by host: webapp1-nodeport-deployment-677bd89b96-kntzp</h1>
+controlplane $ curl 10.111.162.85
+<h1>This request was processed by host: webapp1-nodeport-deployment-677bd89b96-k62j4</h1>
+controlplane $ curl 10.98.165.45
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-d8ggg</h1>
+controlplane $ curl 172.17.0.21
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-bqddb</h1>
+controlplane $ curl 172.17.0.21
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-bqddb</h1>
+controlplane $ curl 172.17.0.21
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-bqddb</h1>
+controlplane $ curl 172.17.0.21
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-d8ggg</h1>
+controlplane $ curl 172.17.0.21
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-bqddb</h1>
+controlplane $ curl 172.17.0.21:30959
+<h1>This request was processed by host: webapp1-loadbalancer-deployment-f45b8d9cd-msjpj</h1>
+controlplane $ curl 172.17.0.21
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-bqddb</h1>
+controlplane $ curl 172.17.0.21:30959
+<h1>This request was processed by host: webapp1-loadbalancer-deployment-f45b8d9cd-hqtwm</h1>
+controlplane $ curl 172.17.0.21:30959
