@@ -161,10 +161,11 @@ spec:
     spec:
       containers:
       - name: webapp1-nodeport-pod        
-	image: katacoda/docker-http-server:latest        
-	ports:
+        image: katacoda/docker-http-server:latest        
+        ports:
         - containerPort: 80
 ---
+
 controlplane $ kubectl get svc
 NAME                               TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
 kubernetes                         ClusterIP      10.96.0.1        <none>        443/TCP        15m
@@ -224,11 +225,12 @@ spec:
         app: webapp1-externalip
     spec:
       containers:      
-	- name: webapp1-externalip-pod        
-	  image: katacoda/docker-http-server:latest
+      - name: webapp1-externalip-pod        
+	image: katacoda/docker-http-server:latest
         ports:
         - containerPort: 80
 ---
+
 controlplane $ kubectl get svc
 NAME                               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
 kubernetes                         ClusterIP   10.96.0.1        <none>        443/TCP        6m10s
