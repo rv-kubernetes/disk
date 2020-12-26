@@ -161,8 +161,8 @@ spec:
     spec:
       containers:
       - name: webapp1-nodeport-pod        
-	    image: katacoda/docker-http-server:latest        
-		ports:
+	image: katacoda/docker-http-server:latest        
+	ports:
         - containerPort: 80
 ---
 controlplane $ kubectl get svc
@@ -224,8 +224,8 @@ spec:
         app: webapp1-externalip
     spec:
       containers:      
-	  - name: webapp1-externalip-pod        
-	    image: katacoda/docker-http-server:latest
+	- name: webapp1-externalip-pod        
+	  image: katacoda/docker-http-server:latest
         ports:
         - containerPort: 80
 ---
