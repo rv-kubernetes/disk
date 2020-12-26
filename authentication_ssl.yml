@@ -46,5 +46,12 @@ docker ps -a
 -look for pod_etcd_master_kube_system
 docker logs xxxx
 
+# view certificate info
+openssl x509 -in xxxxxx.crt -text
 
+k get csr
+-csr-name
 
+k certificate approve <csr-name>
+
+https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/
