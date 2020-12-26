@@ -55,3 +55,6 @@ k get csr
 k certificate approve <csr-name>
 
 https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/
+
+#convert one line
+cat john.csr | base64 | tr -d "\n"
