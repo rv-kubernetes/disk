@@ -1,0 +1,258 @@
+controlplane $ ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+2: ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    inet 172.17.0.8/16 brd 172.17.255.255 scope global ens3
+
+controlplane $ kubectl cluster-info
+Kubernetes master is running at https://172.17.0.8:6443
+KubeDNS is running at https://172.17.0.8:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+controlplane $ kubectl get nodes
+NAME           STATUS   ROLES    AGE     VERSION
+controlplane   Ready    master   3h17m   v1.14.0
+node01         Ready    <none>   3h17m   v1.14.0
+controlplane $ k get nodes -o wide
+NAME           STATUS   ROLES    AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+controlplane   Ready    master   3h17m   v1.14.0   172.17.0.8    <none>        Ubuntu 16.04.6 LTS   4.4.0-184-generic   docker://18.9.7
+node01         Ready    <none>   3h17m   v1.14.0   172.17.0.32   <none>        Ubuntu 16.04.6 LTS   4.4.0-184-generic   docker://18.9.7
+controlplane $ k get all
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   3h18m
+controlplane $
+
+
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-master
+  labels:
+    name: redis-master
+spec:
+  replicas: 1
+  selector:
+    name: redis-master
+  template:
+    metadata:
+      labels:
+        name: redis-master
+    spec:
+      containers:
+      - name: master
+        image: redis:3.0.7-alpine
+        ports:
+        - containerPort: 6379
+        
+controlplane $ kubectl create -f redis-master-controller.yaml
+replicationcontroller/redis-master created
+
+controlplane $ kubectl get rc
+NAME           DESIRED   CURRENT   READY   AGE
+redis-master   1         1         1       43s
+
+controlplane $ kubectl get pods
+NAME                 READY   STATUS    RESTARTS   AGE
+redis-master-txxwd   1/1     Running   0          49s
+controlplane $
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master
+  labels:
+    name: redis-master
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 6379
+    targetPort: 6379
+  selector:
+    name: redis-master
+
+controlplane $ kubectl create -f redis-master-controller.yaml
+replicationcontroller/redis-master created
+controlplane $ kubectl get rc
+NAME           DESIRED   CURRENT   READY   AGE
+redis-master   1         1         1       43s
+controlplane $ kubectl get pods
+NAME                 READY   STATUS    RESTARTS   AGE
+redis-master-txxwd   1/1     Running   0          49s
+controlplane $ kubectl create -f redis-master-service.yaml
+service/redis-master created
+
+controlplane $ kubectl get services
+NAME           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+kubernetes     ClusterIP   10.96.0.1        <none>        443/TCP    3h21m
+redis-master   ClusterIP   10.107.223.199   <none>        6379/TCP   11s
+
+controlplane $ kubectl describe services redis-master
+Name:              redis-master
+Namespace:         default
+Labels:            name=redis-master
+Annotations:       <none>
+Selector:          name=redis-master
+Type:              ClusterIP
+IP:                10.107.223.199
+Port:              <unset>  6379/TCP
+TargetPort:        6379/TCP
+Endpoints:         10.32.0.193:6379
+Session Affinity:  None
+Events:            <none>
+controlplane $
+
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-slave
+  labels:
+    name: redis-slave
+spec:
+  replicas: 2
+  selector:
+    name: redis-slave
+  template:
+    metadata:
+      labels:
+        name: redis-slave
+    spec:
+      containers:
+      - name: worker
+        image: gcr.io/google_samples/gb-redisslave:v1
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+          # If your cluster config does not include a dns service, then to
+          # instead access an environment variable to find the master
+          # service's host, comment out the 'value: dns' line above, and
+          # uncomment the line below.
+          # value: env
+        ports:
+        - containerPort: 6379
+
+
+controlplane $ kubectl create -f redis-slave-controller.yaml
+replicationcontroller/redis-slave created
+controlplane $ kubectl get rc
+NAME           DESIRED   CURRENT   READY   AGE
+redis-master   1         1         1       6m51s
+redis-slave    2         2         0       2s
+controlplane $
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave
+  labels:
+    name: redis-slave
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 6379
+  selector:
+    name: redis-slave
+
+controlplane $ kubectl create -f redis-slave-service.yaml
+service/redis-slave created
+controlplane $ kubectl get services
+NAME           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+kubernetes     ClusterIP   10.96.0.1        <none>        443/TCP    3h27m
+redis-master   ClusterIP   10.107.223.199   <none>        6379/TCP   6m13s
+redis-slave    ClusterIP   10.111.163.90    <none>        6379/TCP   2s
+controlplane $
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: frontend
+  labels:
+    name: frontend
+spec:
+  replicas: 3
+  selector:
+    name: frontend
+  template:
+    metadata:
+      labels:
+        name: frontend
+    spec:
+      containers:
+      - name: php-redis
+        image: gcr.io/google_samples/gb-frontend:v3
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+          # If your cluster config does not include a dns service, then to
+          # instead access environment variables to find service host
+          # info, comment out the 'value: dns' line above, and uncomment the
+          # line below.
+          # value: env
+        ports:
+        - containerPort: 80
+
+controlplane $ kubectl create -f frontend-controller.yaml
+replicationcontroller/frontend created
+controlplane $ kubectl get rc
+NAME           DESIRED   CURRENT   READY   AGE
+frontend       3         3         3       3s
+redis-master   1         1         1       8m47s
+redis-slave    2         2         2       118s
+controlplane $ kubectl get pods
+NAME                 READY   STATUS    RESTARTS   AGE
+frontend-4zwg2       1/1     Running   0          5s
+frontend-f96kk       1/1     Running   0          5s
+frontend-xfd6d       1/1     Running   0          5s
+redis-master-txxwd   1/1     Running   0          8m49s
+redis-slave-q767z    1/1     Running   0          2m
+redis-slave-scf5l    1/1     Running   0          2m
+controlplane $
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    name: frontend
+spec:
+  # if your cluster supports it, uncomment the following to automatically create
+  # an external load-balanced IP for the frontend service.
+  # type: LoadBalancer
+  type: NodePort
+  ports:
+    # the port that this service should serve on
+    - port: 80
+      nodePort: 30080
+  selector:
+    name: frontend
+
+controlplane $ kubectl create -f frontend-service.yaml
+service/frontend created
+controlplane $ kubectl get services
+NAME           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+frontend       NodePort    10.111.131.241   <none>        80:30080/TCP   2s
+kubernetes     ClusterIP   10.96.0.1        <none>        443/TCP        3h29m
+redis-master   ClusterIP   10.107.223.199   <none>        6379/TCP       8m8s
+redis-slave    ClusterIP   10.111.163.90    <none>        6379/TCP       117s
+controlplane $
+
+
+controlplane $ kubectl get pods
+NAME                 READY   STATUS    RESTARTS   AGE
+frontend-4zwg2       1/1     Running   0          79s
+frontend-f96kk       1/1     Running   0          79s
+frontend-xfd6d       1/1     Running   0          79s
+redis-master-txxwd   1/1     Running   0          10m
+redis-slave-q767z    1/1     Running   0          3m14s
+redis-slave-scf5l    1/1     Running   0          3m14s
+
+controlplane $ kubectl describe service frontend | grep NodePort
+Type:                     NodePort
+NodePort:                 <unset>  30080/TCP
+controlplane $
+
+
