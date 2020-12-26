@@ -131,3 +131,24 @@ spec:
 ---
 controlplane $
 
+
+controlplane $ k get svc
+NAME                               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+kubernetes                         ClusterIP   10.96.0.1        <none>        443/TCP        30m
+webapp1-clusterip-svc              ClusterIP   10.106.78.126    <none>        80/TCP         27m
+webapp1-clusterip-targetport-svc   ClusterIP   10.101.217.213   <none>        8080/TCP       18m
+webapp1-externalip-svc             ClusterIP   10.103.122.133   172.17.0.37   80/TCP         2m21s
+webapp1-nodeport-svc               NodePort    10.101.24.235    <none>        80:30080/TCP   13m
+controlplane $ curl 10.106.78.126
+<h1>This request was processed by host: webapp1-clusterip-deployment-669c7c65c4-5d4pr</h1>
+controlplane $ curl 10.103.122.133
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-b747g</h1>
+controlplane $ curl 10.101.24.235
+<h1>This request was processed by host: webapp1-nodeport-deployment-677bd89b96-994nh</h1>
+controlplane $ curl 10.101.24.235:30080
+^C
+controlplane $ curl 172.17.0.37:30080
+<h1>This request was processed by host: webapp1-nodeport-deployment-677bd89b96-994nh</h1>
+controlplane $ curl 172.17.0.37
+<h1>This request was processed by host: webapp1-externalip-deployment-6446b488f8-b747g</h1>
+controlplane $
