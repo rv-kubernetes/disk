@@ -58,7 +58,8 @@ spec:
 controlplane $
 
 
-controlplane $ cat nodeport.yamlapiVersion: v1
+controlplane $ cat nodeport.yaml
+apiVersion: v1
 kind: Service
 metadata:
   name: webapp1-nodeport-svc  labels:
@@ -68,7 +69,8 @@ spec:
   ports:
   - port: 80
     nodePort: 30080
-  selector:    app: webapp1-nodeport---
+  selector:    app: webapp1-nodeport
+  ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
