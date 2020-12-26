@@ -226,7 +226,7 @@ spec:
     spec:
       containers:      
       - name: webapp1-externalip-pod        
-	image: katacoda/docker-http-server:latest
+        image: katacoda/docker-http-server:latest
         ports:
         - containerPort: 80
 ---
