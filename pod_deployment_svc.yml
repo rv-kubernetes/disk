@@ -37,10 +37,12 @@ kind: Service
 metadata:  name: webapp1-clusterip-targetport-svc
   labels:
     app: webapp1-clusterip-targetport
-spec:  ports:
+spec:  
+  ports:
   - port: 8080
     targetPort: 80
-  selector:    app: webapp1-clusterip-targetport
+  selector:    
+    app: webapp1-clusterip-targetport
 ---
 apiVersion: extensions/v1beta1
 kind: Deploymentmetadata:
@@ -53,7 +55,9 @@ spec:
     spec:
       containers:
       - name: webapp1-clusterip-targetport-pod
-        image: katacoda/docker-http-server:latest        ports:        - containerPort: 80
+        image: katacoda/docker-http-server:latest        
+        ports:        
+        - containerPort: 80
 ---
 controlplane $
 
@@ -61,24 +65,33 @@ controlplane $
 controlplane $ cat nodeport.yaml
 apiVersion: v1
 kind: Service
-metadata:
-  name: webapp1-nodeport-svc  labels:
+metadata:  
+  name: webapp1-nodeport-svc
+  labels:
     app: webapp1-nodeport
-spec:
+spec:  
   type: NodePort
   ports:
   - port: 80
-    nodePort: 30080
-  selector:    app: webapp1-nodeport
-  ---
+    nodePort: 30080  selector:
+    app: webapp1-nodeport
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: webapp1-nodeport-deploymentspec:  replicas: 2  template:    metadata:      labels:        app: webapp1-nodeport    spec:
+  name: webapp1-nodeport-deployment
+spec:  
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: webapp1-nodeport
+    spec:
       containers:
-      - name: webapp1-nodeport-pod
-        image: katacoda/docker-http-server:latest
-        ports:        - containerPort: 80
+      - name: webapp1-nodeport-pod        
+	    image: katacoda/docker-http-server:latest        
+		ports:
+        - containerPort: 80
 ---
 controlplane $
 
