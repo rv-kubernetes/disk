@@ -160,10 +160,10 @@ spec:
         app: webapp1-nodeport
     spec:
       containers:
-        - name: webapp1-nodeport-pod        
-	  image: katacoda/docker-http-server:latest        
-	  ports:
-          - containerPort: 80
+      - name: webapp1-nodeport-pod        
+	image: katacoda/docker-http-server:latest        
+	ports:
+        - containerPort: 80
 ---
 controlplane $ kubectl get svc
 NAME                               TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
