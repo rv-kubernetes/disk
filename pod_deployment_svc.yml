@@ -433,6 +433,8 @@ webapp1-externalip-svc             ClusterIP      10.105.223.102   172.17.0.9   
 webapp1-loadbalancer-svc           LoadBalancer   10.106.140.103   172.17.0.9    80:32196/TCP   40s
 webapp1-nodeport-svc               NodePort       10.105.119.141   <none>        80:30080/TCP   5m30s
 controlplane $
+# externalip and loadbalancer will go to the same port unless specified proper port
+# externalip 80, loadbalancer 32196
 
 ccontrolplane $ kubectl describe svc/webapp1-loadbalancer-svc
 Name:                     webapp1-loadbalancer-svc
@@ -466,3 +468,48 @@ controlplane $
 
 
 
+controlplane $ k get pods -o wide
+NAME                                                       READY   STATUS    RESTARTS   AGE     IP           NODE           NOMINATED NODE   READINESS GATES
+webapp1-clusterip-deployment-669c7c65c4-gl6tn              1/1     Running   0          8m3s    10.32.0.6    controlplane   <none>           <none>
+webapp1-clusterip-deployment-669c7c65c4-mn8jr              1/1     Running   0          8m3s    10.32.0.5    controlplane   <none>           <none>
+webapp1-clusterip-targetport-deployment-5599945ff4-ln6nn   1/1     Running   0          7m52s   10.32.0.7    controlplane   <none>           <none>
+webapp1-clusterip-targetport-deployment-5599945ff4-ss7qk   1/1     Running   0          7m52s   10.32.0.8    controlplane   <none>           <none>
+webapp1-nodeport-deployment-677bd89b96-k62j4               1/1     Running   0          7m44s   10.32.0.9    controlplane   <none>           <none>
+webapp1-nodeport-deployment-677bd89b96-kntzp               1/1     Running   0          7m44s   10.32.0.10   controlplane   <none>           <none>
+
+controlplane $ k get all
+NAME                                                           READY   STATUS    RESTARTS   AGE
+pod/webapp1-clusterip-deployment-669c7c65c4-gl6tn              1/1     Running   0          8m11s
+pod/webapp1-clusterip-deployment-669c7c65c4-mn8jr              1/1     Running   0          8m11s
+pod/webapp1-clusterip-targetport-deployment-5599945ff4-ln6nn   1/1     Running   0          8m
+pod/webapp1-clusterip-targetport-deployment-5599945ff4-ss7qk   1/1     Running   0          8m
+pod/webapp1-nodeport-deployment-677bd89b96-k62j4               1/1     Running   0          7m52s
+pod/webapp1-nodeport-deployment-677bd89b96-kntzp               1/1     Running   0          7m52s
+
+NAME                                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service/kubernetes                         ClusterIP   10.96.0.1       <none>        443/TCP        10m
+service/webapp1-clusterip-svc              ClusterIP   10.102.33.74    <none>        80/TCP         8m11s
+service/webapp1-clusterip-targetport-svc   ClusterIP   10.104.9.203    <none>        8080/TCP       8m
+service/webapp1-nodeport-svc               NodePort    10.111.162.85   <none>        80:30080/TCP   7m52s
+
+NAME                                                      READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp1-clusterip-deployment              2/2     2            2           8m11s
+deployment.apps/webapp1-clusterip-targetport-deployment   2/2     2            2           8m
+deployment.apps/webapp1-nodeport-deployment               2/2     2            2           7m52s
+
+NAME                                                                 DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp1-clusterip-deployment-669c7c65c4              2         2         2       8m11s
+replicaset.apps/webapp1-clusterip-targetport-deployment-5599945ff4   2         2         2       8mreplicaset.apps/webapp1-nodeport-deployment-677bd89b96               2         2         2       7m52s
+
+
+controlplane $ k get ep
+NAME                               ENDPOINTS                    AGE
+kubernetes                         172.17.0.21:6443             10m
+webapp1-clusterip-svc              10.32.0.5:80,10.32.0.6:80    8m14s
+webapp1-clusterip-targetport-svc   10.32.0.7:80,10.32.0.8:80    8m3s
+webapp1-nodeport-svc               10.32.0.10:80,10.32.0.9:80   7m55s
+controlplane $
+
+controlplane $ k get pods -n kube-system -o wide | grep -i kube-apiserver
+kube-apiserver-controlplane              1/1     Running   0          12m   172.17.0.21   controlplane   <none>           <none>
+controlplane $
