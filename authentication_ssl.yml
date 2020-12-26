@@ -1,0 +1,35 @@
+k create serviceaccount sa1
+
+k get serviceaccount
+-sa1
+
+# get, not list
+# default
+k get serviceaccount
+NAME      SECRETS   AGE
+default   1         72m
+
+# authenticate user
+curl -v -k https://localhost:6443/api/v1/pods -u "user1:password123"
+
+openssl genrsa -out mycompany.key 1024
+-create mykey.key
+
+openssl rsa -in mykey.key -pubout > mykey.pem
+
+# request
+openssl req -new -key mykey.key -out mykey.csr \
+   -subj "/CN=mykey.com"
+-create mykey.key mykey.csr
+
+#generate
+openssl genrsa -out ca.key 2048
+-ca.key
+
+#signing request
+openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+
+#sign certificates
+openssl x509 -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+
+
