@@ -58,3 +58,5 @@ https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requ
 
 #convert one line
 cat john.csr | base64 | tr -d "\n"
+
+https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
