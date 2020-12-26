@@ -32,4 +32,19 @@ openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
 #sign certificates
 openssl x509 -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
 
+#request apiserver
+openssl x509 -req -in apserver.csr -CA ca.crt -CAkey ca.key -out apiserver.crt
+
+#inspect service logs
+journalctl -u etcd.server -l
+
+#view logs
+k logs etcd-master
+
+#view logs on docker
+docker ps -a
+-look for pod_etcd_master_kube_system
+docker logs xxxx
+
+
 
