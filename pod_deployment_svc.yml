@@ -86,7 +86,8 @@ spec:
     app: webapp1-clusterip-targetport
 ---
 apiVersion: extensions/v1beta1
-kind: Deploymentmetadata:
+kind: Deployment
+metadata:
   name: webapp1-clusterip-targetport-deployment
 spec:
   replicas: 2  template:
