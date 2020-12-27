@@ -1,0 +1,203 @@
+controlplane $ k cluster-info
+Kubernetes master is running at https://172.17.0.13:6443
+KubeDNS is running at https://172.17.0.13:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+
+controlplane $ cat deploy.yaml
+kind: List
+apiVersion: v1
+items:
+- kind: ReplicationController
+  apiVersion: v1
+  metadata:
+    name: frontend
+    labels:
+      name: frontend
+  spec:
+    replicas: 1
+    selector:
+      name: frontend
+    template:
+      metadata:
+        labels:
+          name: frontend
+      spec:
+        containers:
+        - name: frontend
+          image: katacoda/docker-http-server:health
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 1
+            timeoutSeconds: 1
+- kind: ReplicationController
+  apiVersion: v1
+  metadata:
+    name: bad-frontend
+    labels:
+      name: bad-frontend
+  spec:
+    replicas: 1
+    selector:
+      name: bad-frontend
+    template:
+      metadata:
+        labels:
+          name: bad-frontend
+      spec:
+        containers:
+        - name: bad-frontend
+          image: katacoda/docker-http-server:unhealthy
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 1
+            timeoutSeconds: 1
+- kind: Service
+  apiVersion: v1
+  metadata:
+    labels:
+      app: frontend
+      kubernetes.io/cluster-service: "true"
+    name: frontend
+  spec:
+    type: NodePort
+    ports:
+    - port: 80
+      nodePort: 30080
+    selector:
+      app: frontend
+controlplane $
+
+
+controlplane $ kubectl apply -f deploy.yaml
+replicationcontroller/frontend created
+replicationcontroller/bad-frontend created
+service/frontend created
+controlplane $
+
+
+controlplane $ kubectl get pods --selector="name=bad-frontend"
+NAME                 READY   STATUS    RESTARTS   AGE
+bad-frontend-br6tn   0/1     Running   4          2m27s
+controlplane $
+
+
+controlplane $ kubectl get pods --selector="name=bad-frontend"
+NAME                 READY   STATUS    RESTARTS   AGE
+bad-frontend-br6tn   0/1     Running   4          2m27s
+controlplane $ k get all
+NAME                     READY   STATUS             RESTARTS   AGE
+pod/bad-frontend-br6tn   0/1     CrashLoopBackOff   4          2m59s
+pod/frontend-f48kw       1/1     Running            0          2m59s
+
+NAME                                 DESIRED   CURRENT   READY   AGE
+replicationcontroller/bad-frontend   1         1         0       2m59s
+replicationcontroller/frontend       1         1         1       2m59s
+
+NAME                 TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+service/frontend     NodePort    10.105.192.217   <none>        80:30080/TCP   2m59s
+service/kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP        4m57s
+controlplane $
+
+
+
+controlplane $ pod=$(kubectl get pods --selector="name=bad-frontend" --output=jsonpath={.items..metadata.name})
+controlplane $ kubectl describe pod $pod
+Name:               bad-frontend-br6tn
+Namespace:          default
+Priority:           0
+PriorityClassName:  <none>
+Node:               controlplane/172.17.0.13
+Start Time:         Sun, 27 Dec 2020 01:52:19 +0000
+Labels:             name=bad-frontend
+Annotations:        <none>
+Status:             Running
+IP:                 10.32.0.6
+Controlled By:      ReplicationController/bad-frontend
+Containers:
+  bad-frontend:
+    Container ID:   docker://ec70af33486920232e2047d279d828a23922c8b7b25aa1689c071d5ce4eafc61
+    Image:          katacoda/docker-http-server:unhealthy
+    Image ID:       docker-pullable://katacoda/docker-http-server@sha256:bea95c69c299c690103c39ebb3159c39c5061fee1dad13aa1b0625e0c6b52f22
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Sun, 27 Dec 2020 01:55:33 +0000
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    2
+      Started:      Sun, 27 Dec 2020 01:54:20 +0000
+      Finished:     Sun, 27 Dec 2020 01:54:50 +0000
+    Ready:          False
+    Restart Count:  5
+    Liveness:       http-get http://:80/ delay=1s timeout=1s period=10s #success=1 #failure=3
+    Readiness:      http-get http://:80/ delay=1s timeout=1s period=10s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-qkq5k (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             False
+  ContainersReady   False
+  PodScheduled      True
+Volumes:
+  default-token-qkq5k:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-qkq5k
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age                    From                   Message
+  ----     ------     ----                   ----                   -------
+  Normal   Scheduled  3m20s                  default-scheduler      Successfully assigned default/bad-frontend-br6tn to controlplane
+  Normal   Pulling    3m18s                  kubelet, controlplane  Pulling image "katacoda/docker-http-server:unhealthy"
+  Normal   Pulled     3m13s                  kubelet, controlplane  Successfully pulled image "katacoda/docker-http-server:unhealthy"
+  Normal   Created    2m19s (x3 over 3m13s)  kubelet, controlplane  Created container bad-frontend
+  Normal   Started    2m19s (x3 over 3m13s)  kubelet, controlplane  Started container bad-frontend
+  Warning  Unhealthy  2m19s (x6 over 3m9s)   kubelet, controlplane  Liveness probe failed: HTTP probe failed with statuscode: 500
+  Normal   Killing    2m19s (x2 over 2m49s)  kubelet, controlplane  Container bad-frontend failed liveness probe, will be restarted
+  Normal   Pulled     2m19s (x2 over 2m49s)  kubelet, controlplane  Container image "katacoda/docker-http-server:unhealthy" already present on machine
+  Warning  Unhealthy  2m10s (x7 over 3m10s)  kubelet, controlplane  Readiness probe failed: HTTP probe failed with statuscode: 500
+controlplane $
+
+
+
+controlplane $ kubectl get pods --selector="name=frontend"
+NAME             READY   STATUS    RESTARTS   AGE
+frontend-f48kw   1/1     Running   0          4m22s
+controlplane $
+
+
+controlplane $ pod=$(kubectl get pods --selector="name=frontend" --output=jsonpath={.items..metadata.name})
+controlplane $ kubectl exec $pod -- /usr/bin/curl -s localhost/unhealthy
+controlplane $
+
+
+
+controlplane $ kubectl get pods --selector="name=frontend"
+NAME             READY   STATUS    RESTARTS   AGE
+frontend-f48kw   1/1     Running   0          5m37s
+controlplane $
+
+
+
+
