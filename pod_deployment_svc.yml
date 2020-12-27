@@ -75,7 +75,8 @@ controlplane $
 controlplane $ cat clusterip-target.yaml
 apiVersion: v1
 kind: Service
-metadata:  name: webapp1-clusterip-targetport-svc
+metadata:  
+  name: webapp1-clusterip-targetport-svc
   labels:
     app: webapp1-clusterip-targetport
 spec:  
