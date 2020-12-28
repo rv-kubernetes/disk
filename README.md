@@ -1,1 +1,1 @@
-# disk
+# kubernetes disk
