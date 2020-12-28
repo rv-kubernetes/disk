@@ -147,7 +147,8 @@ spec:
   type: NodePort
   ports:
   - port: 80
-    nodePort: 30080  selector:
+    nodePort: 30080  
+  selector:
     app: webapp1-nodeport
 ---
 apiVersion: extensions/v1beta1
