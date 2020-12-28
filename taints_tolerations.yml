@@ -39,3 +39,7 @@ tolerations:
 - key: node-role.kubernetes.io/master
   effect: NoSchedule
     
+# remove taint    
+controlplane $ k taint node controlplane node-role.kubernetes.io/master:NoSchedule-
+node/controlplane untainted
+controlplane $
