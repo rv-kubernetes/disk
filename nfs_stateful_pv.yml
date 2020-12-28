@@ -1,3 +1,20 @@
+# simple local example of pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual #optional
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+    
+
 In this scenario, and for demonstration and learning purposes, the role of the NFS Server is handled by a customised container. 
 The container makes directories available via NFS and stores the data inside the container. In production, it is recommended to configure a dedicated NFS Server.
 
