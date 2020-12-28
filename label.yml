@@ -1,0 +1,4 @@
+To delete the label ‘app’ from service ‘my-service’, for example:
+kubectl label service my-service app-
+To delete a label ‘namespace’ from namespace ‘default’:
+kubectl label namespaces default namespace-
