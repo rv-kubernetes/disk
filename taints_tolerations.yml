@@ -3,4 +3,40 @@ spec:
       tolerations: 
       - effect: NoSchedule
         operator: Exists      
-        
+    
+controlplane $ cat ds.yml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+controlplane $
+
+controlplane $ k get pods -o wide
+NAME                     READY   STATUS    RESTARTS   AGE    IP           NODE           NOMINATED NODE   READINESS GATES
+nginx-deployment-cvzzz   1/1     Running   0          101s   10.244.0.3   controlplane   <none>           <none>
+nginx-deployment-gvfk5   1/1     Running   0          101s   10.244.1.4   node01         <none>           <none>
+controlplane $
+
+# the same but above easier    
+tolerations:
+- key: node-role.kubernetes.io/master
+  effect: NoSchedule
+  
+  
