@@ -3,3 +3,23 @@ k set image deploy nginx nginx=nginx:1.9.1
 
 kubectl create secret generic empty-secret
 kubectl get secret empty-secret
+
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-basic-auth
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin
+  password: t0p-Secret
+  
+  
+  kubectl create secret tls my-tls-secret \
+  --cert=path/to/cert/file \
+  --key=path/to/key/file
+  
+  
+  kubectl create secret generic test-secret --from-literal='username=my-app' --from-literal='password=39528$vdg7Jb'
+  
+  
