@@ -1,8 +1,8 @@
 # tolerate all nodes.
 spec:
-      tolerations: 
-      - effect: NoSchedule
-        operator: Exists      
+  tolerations: 
+  - effect: NoSchedule
+    operator: Exists      
     
 controlplane $ cat ds.yml
 apiVersion: apps/v1
@@ -38,5 +38,4 @@ controlplane $
 tolerations:
 - key: node-role.kubernetes.io/master
   effect: NoSchedule
-  
-  
+    
