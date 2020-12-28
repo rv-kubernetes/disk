@@ -43,3 +43,11 @@ tolerations:
 controlplane $ k taint node controlplane node-role.kubernetes.io/master:NoSchedule-
 node/controlplane untainted
 controlplane $
+
+controlplane $ k taint node node01 node-role.kubernetes.io/node01:NoSchedule
+node/node01 tainted
+controlplane $ k describe node node01|grep -i taint
+Taints:             node-role.kubernetes.io/node01:NoSchedule
+controlplane $ k taint node node01 node-role.kubernetes.io/node01:NoSchedule-
+node/node01 untainted
+controlplane $
