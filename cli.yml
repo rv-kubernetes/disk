@@ -1,1 +1,4 @@
 k run busybox --image=busybox --command sleep 10 --dry-run=client -o yaml
+
+#file located for configuring the CoreDNS service?
+kubectl -n kube-system describe deployments.apps coredns | grep -A2 Args | grep Corefile
