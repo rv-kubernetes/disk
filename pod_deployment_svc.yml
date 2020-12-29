@@ -556,3 +556,10 @@ controlplane $ curl 172.17.0.21
 controlplane $ curl 172.17.0.21:30959
 <h1>This request was processed by host: webapp1-loadbalancer-deployment-f45b8d9cd-hqtwm</h1>
 controlplane $ curl 172.17.0.21:30959
+
+# go to cli
+kubectl exec -it pod1 -- sh
+
+# just run
+kubectl exec pod1 -- ls -la /etc/config
+
