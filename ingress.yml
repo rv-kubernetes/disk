@@ -1,3 +1,5 @@
+#from katakoda
+
 controlplane $ k get nodes -o wide
 NAME           STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
 controlplane   Ready    master   75s   v1.14.0   172.17.0.54   <none>        Ubuntu 16.04.6 LTS   4.4.0-184-generic   docker://18.9.7
