@@ -1,0 +1,3 @@
+kubectl auth can-i list secrets --namespace dev --as john
+
+k create sa john
