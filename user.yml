@@ -1,3 +1,11 @@
 kubectl auth can-i list secrets --namespace dev --as john
 
 k create sa john
+
+# go to default context
+kubectl config use-context kubernetes-admin@kubernetes
+
+# get current context
+cat .kube/config
+or 
+k config view
