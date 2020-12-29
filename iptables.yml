@@ -1,0 +1,2 @@
+# add port forwarding
+iptables -t nat -A PREROUTING --dport 80 --to-destination 192.168.15.2:80 -j DNAT
