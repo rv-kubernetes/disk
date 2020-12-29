@@ -13,3 +13,6 @@ root      2478  2451 14 05:53 ?        00:00:00 kube-apiserver --advertise-addre
 --tls-cert-file=/etc/kubernetes/pki/apiserver.crt --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
 root      2637   890  0 05:53 pts/0    00:00:00 grep --color=auto kubelet
 controlplane $
+
+
+https://drive.google.com/drive/folders/1pGI618V7Mvf4ZOeBfVNY6epahxSUBvkW?usp=sharing
