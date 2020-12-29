@@ -2,4 +2,4 @@
 iptables -t nat -A PREROUTING --dport 80 --to-destination 192.168.15.2:80 -j DNAT
 
 # add namespace ip add
-ip -n <namespace> addr add x.x.x.x dev veth-red
+ip -n <namespace> addr add x.x.x.x/xx dev veth-red
