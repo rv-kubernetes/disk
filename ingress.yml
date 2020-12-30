@@ -291,7 +291,7 @@ controlplane $
 *it need this 
 metadata:
    annotations:
-       nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/rewrite-target: /
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
 *to make it work
 controlplane $ k edit ing ing-pay -n critical-space
@@ -366,8 +366,6 @@ rules:
   verbs:
   - get
 controlplane $
-
-
 
 
 controlplane $ k get rolebinding -n ingress-space -o yaml
