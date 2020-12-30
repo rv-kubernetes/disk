@@ -286,3 +286,17 @@ controlplane $ curl 172.17.0.54
 curl: (7) Failed to connect to 172.17.0.54 port 80: Connection refused
 controlplane $
 
+
+# from kodekloud
+*it need this 
+metadata:
+   annotations:
+       nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+*to make it work
+controlplane $ k edit ing ing-pay -n critical-space
+Warning: extensions/v1beta1 Ingress is deprecated in v1.14+, unavailable in v1.22+; use networking.k8s.io/v1 Ingress
+ingress.extensions/ing-pay edited
+controlplane $
+
+
