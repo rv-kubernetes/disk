@@ -1,0 +1,11 @@
+k run static-busybox --image=busybox --command sleep 1000 --dry-run=client -o yaml > static.yml
+
+ls /etc/kubernetes/manifests
+
+cd /var/lib/kubelet
+grep -i staticPod config.yml
+staticPodPath: /etc/kubernetes/manifests
+
+mv static.yml /etc/kubernetes/manifests
+
+k get pods
