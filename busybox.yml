@@ -1,1 +1,3 @@
 https://github.com/docker-library/busybox/issues/48
+
+kubectl run --attach busybox --rm --image=busybox:1.28 --restart=Never -- sh -c "sleep 4 && nslookup kubernetes.default"
