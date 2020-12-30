@@ -563,3 +563,5 @@ kubectl exec -it pod1 -- sh
 # just run
 kubectl exec pod1 -- ls -la /etc/config
 
+# create pod with labels
+k run messaging --image=redis:alpine -l tier=msg
