@@ -571,3 +571,5 @@ k get pod messaging --show-labels
 k expose pod messaging --name messaging-service --port 6379 --target-port 6379
 
 kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
+
+k rollout history deploy/nginx-pod
