@@ -300,3 +300,216 @@ ingress.extensions/ing-pay edited
 controlplane $
 
 
+
+k get all -n app-space
+k create ns ingress-space
+k get ns
+k create cm  nginx-configuration -n ingress-space
+k get cm -n ingress-space
+k create sa ingress-serviceaccount -n ingress-space
+
+controlplane $ k get role ingress-role -n ingress-space -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: "2020-12-30T00:34:40Z"
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+  managedFields:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/name: {}
+          f:app.kubernetes.io/part-of: {}
+      f:rules: {}
+    manager: python-requests
+    operation: Update
+    time: "2020-12-30T00:34:40Z"
+  name: ingress-role
+  namespace: ingress-space
+  resourceVersion: "1884"
+  selfLink: /apis/rbac.authorization.k8s.io/v1/namespaces/ingress-space/roles/ingress-role
+  uid: 30caa006-bcfb-4120-a94a-553ceb587de2
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resourceNames:
+  - ingress-controller-leader-nginx
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+controlplane $
+
+
+
+
+controlplane $ k get rolebinding -n ingress-space -o yaml
+apiVersion: v1
+items:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2020-12-30T00:34:40Z"
+    labels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+    managedFields:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:labels:
+            .: {}
+            f:app.kubernetes.io/name: {}
+            f:app.kubernetes.io/part-of: {}
+        f:roleRef:
+          f:apiGroup: {}
+          f:kind: {}
+          f:name: {}
+        f:subjects: {}
+      manager: python-requests
+      operation: Update
+      time: "2020-12-30T00:34:40Z"
+    name: ingress-role-binding
+    namespace: ingress-space
+    resourceVersion: "1885"
+    selfLink: /apis/rbac.authorization.k8s.io/v1/namespaces/ingress-space/rolebindings/ingress-role-binding
+    uid: 5764bc0c-f6f1-4983-a56d-b7e5a38eb98a
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: ingress-role
+  subjects:
+  - kind: ServiceAccount
+    name: ingress-serviceaccount
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+controlplane $
+
+
+controlplane $ cat /root/ingress-controller.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-controller
+  namespace: ingress-space
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nginx-ingress
+  template:
+    metadata:
+      labels:
+        name: nginx-ingress
+    spec:
+      serviceAccountName: ingress-serviceaccount
+      containers:
+        - name: nginx-ingress-controller
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.21.0
+          args:
+            - /nginx-ingress-controller
+            - --configmap=$(POD_NAMESPACE)/nginx-configuration
+            - --default-backend-service=app-space/default-http-backend
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+controlplane $
+
+
+controlplane $ k create -f /root/ingress-controller.yaml
+deployment.apps/ingress-controller created
+controlplane $
+
+
+# equivalent of ingress in service
+controlplane $ cat svc.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress
+  namespace: ingress-space
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+      nodePort: 30080
+      name: http
+    - port: 443
+      targetPort: 443
+      protocol: TCP
+      name: https
+    selector:
+      app: nginx-ingress
+controlplane $
+
+
+controlplane $ k get all -n ingress-space
+NAME                                     READY   STATUS    RESTARTS   AGE
+pod/ingress-controller-5857685bf-9bk2d   1/1     Running   0          8m55s
+
+NAME              TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+service/ingress   NodePort   10.107.7.155   <none>        80:30080/TCP,443:31569/TCP   8s
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/ingress-controller   1/1     1            1           8m55s
+
+NAME                                           DESIRED   CURRENT   READY   AGE
+replicaset.apps/ingress-controller-5857685bf   1         1         1       8m55s
+
+
+controlplane $ k get all -n ingress-space
+NAME                                     READY   STATUS    RESTARTS   AGE
+pod/ingress-controller-5857685bf-9bk2d   1/1     Running   0          8m55s
+
+NAME              TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+service/ingress   NodePort   10.107.7.155   <none>        80:30080/TCP,443:31569/TCP   8s
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/ingress-controller   1/1     1            1           8m55s
+
+NAME                                           DESIRED   CURRENT   READY   AGE
+replicaset.apps/ingress-controller-5857685bf   1         1         1       8m55s
