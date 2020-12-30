@@ -550,3 +550,17 @@ NAMESPACE   NAME                 CLASS    HOSTS   ADDRESS   PORTS   AGE
 app-space   ingress-wear-watch   <none>   *                 80      2s
 controlplane $
 
+
+controlplane $ k get all -n ingress-space
+NAME                                     READY   STATUS    RESTARTS   AGE
+pod/ingress-controller-5857685bf-9bk2d   1/1     Running   0          24m
+
+NAME              TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/ingress   NodePort   10.103.23.189   <none>        80:30080/TCP,443:32180/TCP   5m55s
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/ingress-controller   1/1     1            1           24m
+
+NAME                                           DESIRED   CURRENT   READY   AGE
+replicaset.apps/ingress-controller-5857685bf   1         1         1       24m
+controlplane $
