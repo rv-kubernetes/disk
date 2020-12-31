@@ -4,3 +4,111 @@ kubectl run --attach busybox --rm --image=busybox:1.28 --restart=Never -- sh -c 
 
 https://github.com/dgkanatsios/CKAD-exercises/blob/master/d.configuration.md
 
+# example 3
+
+k create sa pvviewer
+k get sa
+k create clusterrole pvviewer-role --verb=list --resource=persistentvolume
+k create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --serviceaccount=pvviewer
+k create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --serviceaccount=default.pvviewer
+k create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --serviceaccount=default:pvviewer
+k run pvviewer image=redis --dry-run -o yaml > pod.yaml
+k run pvviewer --image=redis --dry-run -o yaml > pod.yaml
+k run pvviewer --image=redis --dry-run=client -o yaml > pod.yaml
+vi pod.yaml
+k create -f pod.yaml
+vi pod.yaml
+k create -f pod.yaml
+vi pod.yaml
+k create -f pod.yaml
+k get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}'
+k get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}' > /root/CKA/node_ips
+k get nodes
+k run multi-pod --image=nginx --dry-run=client -o yaml > mpod.yml
+vi mpod.yml
+k run multi-pod --image=nginx --command sleep 4800 --dry-run=client -o yaml > mpod2.yml
+cat mpod2.yml
+vi mpod.yml
+k create -f mpod.yml
+vi mpod.yml
+k create -f mpod.yml
+vi mpod.yml
+k create -f mpod.yml
+k get all
+k describe pod/multi-pod
+k get all
+c
+k run non-root-pod image=redis:alpine --dry-run=client -o yaml > non.yaml
+k run non-root-pod --image=redis:alpine --dry-run=client -o yaml > non.yaml
+vi non.yaml
+k create -f non.yaml
+k get all
+k describe pod/np-test-1
+k get pods -o wide
+k describe svc/np-test-service
+k get pod/np-test-1  --show-labels
+k get netpol
+vi net.yml
+k run --attach busybox --rm --image=busybox:1.28 --restart=Never -- sh -c "sleep 4 && nc -zv -w 2 0.44.0.2 80"
+k run --attach busybox --rm --image=busybox:1.28 --restart=Never -- sh -c "sleep 4 && nc -zv -w 2 10.44.0.2 80"
+ls -ltr
+cat net.yml
+k create -f net.yml
+k explain networkpolicy
+vi net.yml
+k create -f net.yml
+vi net.yml
+k create -f net.yml
+k run --attach busybox --rm --image=busybox:1.28 --restart=Never -- sh -c "sleep 4 && nc -zv -w 2 10.44.0.2 80"
+k get pods -o wide
+k delete -f net.yml
+vi net.yml
+k create -f net.yml
+k run --attach busybox --rm --image=busybox:1.28 --restart=Never -- sh -c "sleep 4 && nc -zv -w 2 10.44.0.2 80"
+k get all
+k describe pod/pvviewer
+k taint node node01 env_type=production:NoSchedule
+k describe node node01 | grep -i taint
+k run dev-redis --image=redis:alpine
+k get pods -o wide
+k run prod-redis --image=redis:alpine --dry-run=client -o yaml > taint.yml
+vi taint.yml
+k create -f taint.yml
+k get pods -o yaml
+k get pods -o wide
+k get ns
+k create ns hr
+k run hr-pod --image=redis:alpine --dry-run=client -o yaml > hr.yml
+vi hr.yml
+k create -f hr.yml
+k get all
+k get all -n hr
+k get pod/hr-pod -n hr --show-labels
+k config view
+k cluster-info
+k config view kubeconfig=/root/CKA/super.kubeconfig
+k config view --kubeconfig=/root/CKA/super.kubeconfig
+k cluster-info --kubeconfig=/root/CKA/super.kubeconfig
+ls /root/CKA/super.kubeconfig
+k cluster-info --kubeconfig=/root/CKA/super.kubeconfig
+k cluster-info --kubeconfig=/root/CKA/super.kubeconfig
+vi /root/CKA/super.kubeconfig
+ip a
+vi /root/CKA/super.kubeconfig
+k cluster-info --kubeconfig=/root/CKA/super.kubeconfig
+k get all
+k scale deploy/nginx-deploy --replicas=3
+k get all
+k get pods -n kube-system
+cd /etc/kubernetes/manifests/
+ll
+vi kube-controller-manager.yaml
+grep contro1ler kube-controller-manager.yaml
+cp -p kube-controller-manager.yaml /root/kube-controller-manager.bak
+sed 's/contro1ler/controller/g' -i kube-controller-manager.yaml
+grep controller kube-controller-manager.yaml
+grep controller kube-controller-manager.yaml| wc -l
+history
+k get pods -n kube-system
+k get all
+
