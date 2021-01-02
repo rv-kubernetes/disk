@@ -1334,6 +1334,145 @@ status:
 controlplane $
 
 
+controlplane $ k create cm nginx-configuration -n ingress-space
+configmap/nginx-configuration created
+controlplane $ k create sa ingress-serviceaccount -n ingress-space
+serviceaccount/ingress-serviceaccount created
+controlplane $ k get role -n ingress-space
+NAME           CREATED AT
+ingress-role   2021-01-01T23:31:30Z
+controlplane $ k get rolebinding -n ingress-space
+NAME                   ROLE                AGE
+ingress-role-binding   Role/ingress-role   21s
+controlplane $
+
+
+controlplane $ k get rolebinding -n ingress-space
+NAME                   ROLE                AGE
+ingress-role-binding   Role/ingress-role   21s
+controlplane $ k get role -n ingress-space ingress-role -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: "2021-01-01T23:31:30Z"
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+  managedFields:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/name: {}
+          f:app.kubernetes.io/part-of: {}
+      f:rules: {}
+    manager: python-requests
+    operation: Update
+    time: "2021-01-01T23:31:30Z"
+  name: ingress-role
+  namespace: ingress-space
+  resourceVersion: "6132"
+  selfLink: /apis/rbac.authorization.k8s.io/v1/namespaces/ingress-space/roles/ingress-role
+  uid: 024ef890-71ce-4d9b-805c-8047d5111586
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resourceNames:
+  - ingress-controller-leader-nginx
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+controlplane $
+
+
+
+
+controlplane $ k get rolebinding -n ingress-space ingress-role-binding -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  creationTimestamp: "2021-01-01T23:31:31Z"
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+  managedFields:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/name: {}
+          f:app.kubernetes.io/part-of: {}
+      f:roleRef:
+        f:apiGroup: {}
+        f:kind: {}
+        f:name: {}
+      f:subjects: {}
+    manager: python-requests
+    operation: Update
+    time: "2021-01-01T23:31:31Z"
+  name: ingress-role-binding
+  namespace: ingress-space
+  resourceVersion: "6133"
+  selfLink: /apis/rbac.authorization.k8s.io/v1/namespaces/ingress-space/rolebindings/ingress-role-binding
+  uid: ab822050-92ed-4e7e-9851-e8c12dce2db8
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ingress-role
+subjects:
+- kind: ServiceAccount
+  name: ingress-serviceaccount
+controlplane $
+
+
+controlplane $ cat ingress.yml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: app-space
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /wear
+        backend:
+          serviceName: wear-service
+          servicePort: 8080
+      - path: /watch
+        backend:
+          serviceName: video-service
+          servicePort: 8080
+controlplane $
 
 ############################################### INGRESS CONTROLLER -end
 
