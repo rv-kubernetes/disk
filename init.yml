@@ -18,4 +18,8 @@ spec:
     - echo the app is initializing && sleep 10
 
 #testing
+<<<<<<< HEAD
 #dev 3
+=======
+#dev 4
+>>>>>>> main
