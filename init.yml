@@ -18,4 +18,4 @@ spec:
     - echo the app is initializing && sleep 10
 
 #testing
-#git 0
+#dev 3
