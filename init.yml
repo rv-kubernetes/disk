@@ -16,3 +16,5 @@ spec:
     - sh
     - -c
     - echo the app is initializing && sleep 10
+
+#testing
